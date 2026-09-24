@@ -163,15 +163,23 @@ for (const target of targets) {
         meta.official_embed_loaded=meta.official_embed_http_status===200;
       } finally { await c.close(); }
 
-      const resolver=`https://d.instagram7.com/reel/${code}/`;
-      meta.resolver={provider:'Instagram7',url:resolver,role:'public third-party media resolver; not a native metrics source'};
+      const api=`https://dowdstagram.com/api/embed?url=${encodeURIComponent(target.url)}`;
+      meta.resolver={provider:'IG Linker / Dowdstagram',url:api,role:'public no-auth embed API; not a native metrics source'};
       try {
+        const ar=await fetch(api,{headers:{'accept':'application/json','user-agent':'Mozilla/5.0'},signal:AbortSignal.timeout(20000)});
+        if (!ar.ok) throw new Error(`embed API HTTP ${ar.status}`);
+        const aj=await ar.json();
+        meta.resolver_api={success:aj?.success,source:aj?.source,id:aj?.id,type:aj?.type,instagramUrl:aj?.instagramUrl,media_count:Array.isArray(aj?.media)?aj.media.length:0};
+        if (aj?.id !== code) throw new Error(`shortcode mismatch api=${aj?.id} expected=${code}`);
+        const item=(aj?.media||[]).find(x=>x?.type==='video' && /^https:\\/\\//.test(x?.url||''));
+        if (!item) throw new Error('no video URL returned by embed API');
+        meta.resolved_media_url=item.url;
         const media=`${dir}/resolved-video.mp4`;
-        const got=await fetchMedia(resolver,media);
+        const got=await fetchMedia(item.url,media);
         meta.resolver_result=got;
         meta.media_frames=await sampleMedia(media,dir,got.duration);
         meta.capture_scope='full_video';
-        meta.capture_method='third_party_public_resolver_download_ffprobe_verified';
+        meta.capture_method='public_noauth_embed_api_media_download_ffprobe_verified';
         meta.status='full_video_captured';
         meta.full_video_verified=true;
       } catch(e) {
