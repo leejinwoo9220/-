@@ -163,7 +163,25 @@ for (const target of targets) {
         meta.official_embed_loaded=meta.official_embed_http_status===200;
       } finally { await c.close(); }
 
+      const direct=`https://c.instagramfix.com/reel/${code}/`;
+      meta.resolver_attempts=[];
+      try {
+        const media=`${dir}/resolved-video.mp4`;
+        const got=await fetchMedia(direct,media);
+        meta.resolver_attempts.push({provider:'InstagramFix direct',url:direct,ok:true});
+        meta.resolver={provider:'InstagramFix direct',url:direct,role:'public direct-media embed resolver; not a native metrics source'};
+        meta.resolver_result=got;
+        meta.media_frames=await sampleMedia(media,dir,got.duration);
+        meta.capture_scope='full_video';
+        meta.capture_method='public_direct_media_resolver_download_ffprobe_verified';
+        meta.status='full_video_captured';
+        meta.full_video_verified=true;
+      } catch(directErr) {
+        meta.resolver_attempts.push({provider:'InstagramFix direct',url:direct,ok:false,error:String(directErr?.message||directErr)});
+      }
+
       const api=`https://dowdstagram.com/api/embed?url=${encodeURIComponent(target.url)}`;
+      if (meta.capture_scope !== 'full_video') {
       meta.resolver={provider:'IG Linker / Dowdstagram',url:api,role:'public no-auth embed API; not a native metrics source'};
       try {
         const ar=await fetch(api,{headers:{'accept':'application/json','user-agent':'Mozilla/5.0'},signal:AbortSignal.timeout(20000)});
@@ -184,6 +202,8 @@ for (const target of targets) {
         meta.full_video_verified=true;
       } catch(e) {
         meta.resolver_error=String(e?.message||e);
+        meta.resolver_attempts.push({provider:'IG Linker / Dowdstagram',url:api,ok:false,error:String(e?.message||e)});
+      }
       }
     } else {
       meta.status='unsupported_platform';
