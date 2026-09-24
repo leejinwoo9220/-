@@ -3,12 +3,12 @@
     "key": "tiktok-maison-7685050631870106913",
     "platform": "tiktok",
     "url": "https://www.tiktok.com/@maison.films/video/7685050631870106913",
-    "run_label": "resolver-validation-v3"
+    "run_label": "embed-client-v4"
   },
   {
     "key": "instagram-reel-DbAqmKPIaY5",
     "platform": "instagram",
     "url": "https://www.instagram.com/reel/DbAqmKPIaY5/",
-    "run_label": "resolver-validation-v3"
+    "run_label": "embed-client-v4"
   }
 ]
