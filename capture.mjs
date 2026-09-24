@@ -171,7 +171,7 @@ for (const target of targets) {
         const aj=await ar.json();
         meta.resolver_api={success:aj?.success,source:aj?.source,id:aj?.id,type:aj?.type,instagramUrl:aj?.instagramUrl,media_count:Array.isArray(aj?.media)?aj.media.length:0};
         if (aj?.id !== code) throw new Error(`shortcode mismatch api=${aj?.id} expected=${code}`);
-        const item=(aj?.media||[]).find(x=>x?.type==='video' && /^https:\\/\\//.test(x?.url||''));
+        const item=(aj?.media||[]).find(x=>x?.type==='video' && /^https:\/\//.test(x?.url||''));
         if (!item) throw new Error('no video URL returned by embed API');
         meta.resolved_media_url=item.url;
         const media=`${dir}/resolved-video.mp4`;
