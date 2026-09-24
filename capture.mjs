@@ -34,9 +34,10 @@ async function fetchMedia(url,path) {
   const r=await fetch(url,{
     redirect:'follow',
     headers:{
-      'user-agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140 Safari/537.36',
+      'user-agent':'Discordbot/2.0 (+https://discordapp.com)',
       'accept':'video/*,*/*;q=0.8'
-    }
+    },
+    signal: AbortSignal.timeout(45000)
   });
   const type=r.headers.get('content-type');
   const buf=Buffer.from(await r.arrayBuffer());
