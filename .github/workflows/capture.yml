@@ -1,0 +1,27 @@
+name: Capture public social video
+on:
+  push:
+    paths:
+      - targets.json
+  workflow_dispatch:
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: node capture.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: social-capture
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
