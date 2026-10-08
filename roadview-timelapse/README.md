@@ -28,6 +28,24 @@ Windows에서는 `sogni-agent.cmd`가 cmd.exe를 거치면서 여러 줄로 된 
 
 키나 캡처 원본은 이 공개 저장소에 올리지 않습니다(`.gitignore`에서 `captures/`와 `work/`를 제외합니다).
 
+## Windows 데스크탑에서 바로 실행 (Sogni가 이미 설치·로그인된 PC)
+
+PowerShell에서 실행합니다. Python 3.10 이상, ffmpeg, Node 22, sogni-agent가 PATH에 있어야 합니다.
+
+```powershell
+git clone -b claude/timelapse-video-production-qbntgh https://github.com/leejinwoo9220/-.git rvt-repo
+cd rvt-repo\roadview-timelapse
+pip install -e .
+sogni-agent doctor --json                      # "success": true 인지 확인 (기존 로그인 키 사용)
+
+# captures 폴더에 날짜를 파일 이름으로 넣기: 2009-08.png, 2014-05.png, 2026-05.png ...
+python -m rvt init captures --scene "a narrow two-lane shop street in Seoul"
+python -m rvt prep project.json                # 정렬 결과 확인: work\qa\stills_sheet.jpg, work\qa\blink.gif
+python -m rvt run project.json --execute       # 정렬 → H3 생성(Sogni CLI) → 간판 고정·멈춤 보정 → 합본
+```
+
+최종 영상은 `work\final\<name>.mp4`, 검수 결과는 `work\qa\finish_report.json`에 저장됩니다. 이 폴더에서 `claude remote-control`을 실행해 두면 클라우드의 Claude 세션이 이 PC에서 작업을 이어받을 수 있습니다.
+
 ## 빠른 확인 (합성 데이터 데모, 네트워크 불필요)
 
 ```bash

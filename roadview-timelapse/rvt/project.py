@@ -99,3 +99,41 @@ def transition_key(a: dict, b: dict) -> str:
 
 def clone(p: dict) -> dict:
     return copy.deepcopy(p)
+
+
+IMAGE_EXT = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
+
+
+def scaffold(captures_dir: str | Path, out: str | Path, scene: str | None = None) -> Path:
+    """Write a starter project.json from a folder of captures named by date
+    (e.g. 2009-08.png, roadview_2014_05.jpg)."""
+    import re
+
+    from .util import write_json
+
+    cdir = Path(captures_dir).resolve()
+    out = Path(out).resolve()
+    files = sorted(f for f in cdir.iterdir() if f.suffix.lower() in IMAGE_EXT)
+    if len(files) < 2:
+        raise ValueError(f"need at least two capture images in {cdir}")
+    caps, seen = [], set()
+    for f in files:
+        m = re.search(r"((?:19|20)\d{2})(?:[-_. ]?(0[1-9]|1[0-2]))?", f.stem)
+        date = f"{m.group(1)}-{m.group(2)}" if m and m.group(2) else (m.group(1) if m else None)
+        cid = date if date and date not in seen else f.stem
+        seen.add(cid)
+        try:
+            rel = f.relative_to(out.parent).as_posix()
+        except ValueError:
+            rel = str(f)
+        caps.append({"id": cid, "file": rel, "date": date or cid})
+    proj = {
+        "name": out.parent.name or "roadview",
+        "scene": scene or "a city street lined with shop buildings",
+        "orientation": "landscape",
+        "captures": caps,
+        "transitions": {},
+        "signs": [],
+    }
+    write_json(out, proj)
+    return out
