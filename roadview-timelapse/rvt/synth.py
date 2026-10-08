@@ -121,7 +121,7 @@ def make_capture(era_index: int, lam: float = -0.22, size=(1600, 900), ui: bool 
 UI_CROP = [40, 100, 1600, 900]
 
 
-def write_demo_project(root, lam: float = -0.24) -> str:
+def write_demo_project(root, lam: float = 0.0) -> str:
     """Write 4 synthetic road-view captures and a project.json; returns its path."""
     from pathlib import Path
 

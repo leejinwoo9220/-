@@ -2,7 +2,7 @@
 
 같은 장소를 연도별로 캡처한 로드뷰 3~5장(보통 2008~2009년부터 현재까지)을 받아 아래 순서로 처리합니다.
 
-1. **어안 제거**: 로드뷰 뷰어 특유의 휘어진 화면을 일반 사진(직선이 곧은 사진)으로 펴기
+1. **원본 그대로 사용**: 캡처는 일반 사진 그대로 쓰고 렌즈 변형(어안 효과)을 전혀 가하지 않습니다. 렌즈 보정은 정말 휘어진 캡처에만 켜는 선택 기능입니다
 2. **같은 화각·구도로 정렬**: 모든 연도를 기준 연도 한 장의 시점에 픽셀 단위로 맞추기
 3. **영상 생성(Sogni, MiniMax H3 Standard)**: 캡처 날짜에서는 실제 속도로, 그 사이 기간은 빨리감기 타임랩스로
 4. **후반 보정**: 간판 글자를 원본 픽셀로 고정하고, 멈춰 있는 사람/차를 검출·제거하고, 속도 램프를 적용한 뒤 합본
@@ -55,9 +55,9 @@ python -m pytest -q                    # 14개 테스트
 
 | 키 | 의미 |
 |---|---|
-| `captures[].crop` | 원본 캡처에서 로드뷰 화면(viewport)만 남길 `[x, y, w, h]`. 어안 중심은 이 영역의 중앙으로 계산합니다 |
+| `captures[].crop` | 원본 캡처에서 로드뷰 화면(viewport)만 남길 `[x, y, w, h]` |
 | `captures[].ignore` | 특징점 매칭에서 제외할 영역(화면 위 UI, 워터마크) |
-| `captures[].undistort` | 기본값 `{"model": "auto"}`. 고정하려면 `{"model": "division", "param": -0.22}`, 어안 모델은 `stereographic` / `equidistant` / `equisolid` |
+| `captures[].undistort` | 기본값 `{"model": "none"}`(변형 없음). 캡처가 실제로 휘어 있을 때만 `{"model": "auto"}`나 `{"model": "division", "param": -0.22}`를 지정합니다 |
 | `captures[].anchors` | 자동 매칭이 실패할 때 수동 대응점 4개 이상 `[x, y, x_ref, y_ref]`(`work/undistorted/*_grid.jpg`의 픽셀 좌표) |
 | `captures[].crowd` | `light` / `moderate` / `busy`. 실제 속도 구간의 인파 밀도 |
 | `reference` | 구도의 기준이 될 캡처(기본값은 가장 최근 캡처) |
@@ -66,7 +66,7 @@ python -m pytest -q                    # 14개 테스트
 | `signs[].box` | 간판 위치 `[x, y, w, h]`(0~1 정규화). `work/qa/sign_grid.jpg`의 격자를 보고 읽습니다 |
 | `orientation` | `landscape`(H3 캔버스 1344×768, 납품 1920×1080) 또는 `portrait`(768×1344, 납품 1080×1920) |
 
-### 2) 정지 이미지: 어안 제거와 정렬
+### 2) 정지 이미지: 정렬
 
 ```bash
 python -m rvt prep project.json
@@ -74,7 +74,7 @@ python -m rvt prep project.json
 
 | 결과 | 내용 |
 |---|---|
-| `work/undistorted/<id>.jpg` | 어안을 제거한 일반 사진 |
+| `work/undistorted/<id>.jpg` | 크롭만 적용한 원본 사진(렌즈 보정을 켠 경우 보정된 사진) |
 | `work/aligned/master/<id>.png` | 같은 화각·구도로 맞춘 고해상도 사진(간판 고정에 사용) |
 | `work/aligned/canvas/<id>.png` | H3 입력 크기(1344×768)로 맞춘 사진 |
 | `work/qa/stills_sheet.jpg`, `blink.gif` | 연도별 비교 시트와 깜빡이 비교 |
@@ -143,7 +143,9 @@ python -m rvt finish project.json   # → work/final/<name>.mp4, work/qa/finish_
 - **생성 클립 업스케일**: 사람·차 영역의 화질이 아쉬우면 Sogni FlashVSR(`sogni-agent --upscale-video`)로 업스케일한 뒤 같은 고정 과정을 거칩니다. 간판에는 생성형 초해상도를 쓰지 않습니다(글자를 지어낼 위험).
 - **LoRA**: `video.loras`에 `{"id": "h3-realism-people", "strength": 0.6}`를 넣으면 사람 질감이 좋아집니다. 강도 1.5 이상에서는 카메라가 당겨져 구도가 깨질 수 있습니다. 프롬프트 준수용 `h3-vbvr-video-reasoning`은 Sogni에서 `--no-filter`를 요구하므로 기본값에서 뺐습니다.
 
-## 어안 제거 방식
+## 선택 기능: 렌즈 보정 (기본 꺼짐)
+
+캡처에 렌즈 변형을 가하면 오히려 어안처럼 보이게 되므로 기본값은 `none`입니다. 아래는 원본 캡처 자체가 휘어 있을 때만 쓰는 기능입니다.
 
 - 뷰포트 중심 기준의 방사 왜곡으로 모델링합니다. 기본값은 1-파라미터 division 모델(`r_u = r_d / (1 + λ r_d²)`)이고, 진짜 어안 투영(등거리, 입체, 등입체각)도 지원합니다.
 - 계수는 plumb-line 기준으로 자동 추정합니다. 왜곡된 화면에서 짧은 선분을 찾아 후보 계수마다 편 다음 Hough 공간에 투표하고, 같은 건물 모서리의 조각들이 한 직선에 가장 잘 모이는 계수를 고릅니다. 합성 데이터에서 λ 오차는 ±0.01~0.02 수준입니다.

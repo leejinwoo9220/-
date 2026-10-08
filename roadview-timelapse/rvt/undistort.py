@@ -1,7 +1,8 @@
-"""Fisheye / wide-angle removal for road-view screenshots.
+"""Optional lens correction for road-view screenshots (off by default).
 
-Road-view viewers render a wide field of view, so straight building edges bow
-outward (barrel / "fisheye" look).  We model the capture as a radially
+By default captures are taken as ordinary photos and never warped.  If a
+capture really does bow straight building edges outward (barrel / "fisheye"
+look), set ``undistort: {"model": "auto"}`` on it.  We model the capture as a radially
 symmetric projection around the viewport centre and remap it to an ordinary
 rectilinear photo, where straight lines in the world are straight in the image.
 
@@ -334,13 +335,16 @@ def solve_capture(img_raw: np.ndarray, spec: dict) -> Geometry:
     """Build the undistortion geometry for one capture from its project spec.
 
     spec keys (all optional): crop [x,y,w,h], ignore [[x,y,w,h]...] (raw coords),
-    undistort: {model: auto|division|none|stereographic|..., param: number|null}
-    """
+    undistort: {model: none|auto|division|stereographic|..., param: number|null}
+
+    The default is ``none``: captures are used as the ordinary photos they are
+    and no lens warp is applied.  Lens correction is opt-in for captures that
+    really are bowed."""
     crop = spec.get("crop") or []
     vp = apply_crop(img_raw, crop)
     h, w = vp.shape[:2]
     ud = spec.get("undistort") or {}
-    model = ud.get("model", "auto")
+    model = ud.get("model", "none")
     param = ud.get("param")
     ignore = []
     for x, y, rw, rh in spec.get("ignore", []) or []:

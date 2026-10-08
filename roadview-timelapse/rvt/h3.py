@@ -78,6 +78,8 @@ def hold_prompt(scene: str, frames: int, crowd: str = "moderate", loras: list[di
     desc = (
         f"[Shot 1] {_trigger(loras or [])}Live-action, documentary street footage, a Static Shot from a camera locked on a "
         f"tripod at roof height of a car begins exactly from <Picture 1>, framing {scene}. "
+        "The picture has the flat perspective of an ordinary lens, with building edges and utility poles standing "
+        "straight and upright. "
         "The buildings, storefronts, signboards, utility poles, overhead wires, trees and road markings stay fixed in "
         "place and unchanged for the whole shot, and the daylight and shadows hold steady. "
         f"{who} on both sidewalks walk at an ordinary real-time pace from the first frame to the last, stepping "
@@ -113,7 +115,8 @@ def transition_prompt(scene: str, year_a: int, year_b: int, frames: int, changes
                    "appearance they have in Picture 2.")
     desc = (
         f"[Shot 1] {_trigger(loras or [])}Live-action, fixed-camera time-lapse footage, a Static Shot from the same tripod "
-        f"position begins in the position and framing established by Picture 1, showing {scene}. "
+        f"position begins in the position and framing established by Picture 1, showing {scene} with the flat "
+        "perspective of an ordinary lens, building edges and utility poles standing straight and upright. "
         "In the first second the pedestrians and vehicles of the opening moment hurry out of frame and the footage "
         f"accelerates into a time-lapse spanning the years {span}: days and nights flicker past, shadows sweep across "
         "the facades, and the sidewalks and lanes carry a constant rush of translucent, motion-blurred pedestrians "

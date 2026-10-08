@@ -8,7 +8,7 @@ from rvt import project as P
 @pytest.mark.parametrize("lam", [-0.35, -0.2, -0.1, 0.0, 0.08])
 def test_lens_recovered(lam):
     raw, _ = synth.make_capture(3, lam=lam)
-    geom = undistort.solve_capture(raw, {"crop": synth.UI_CROP})
+    geom = undistort.solve_capture(raw, {"crop": synth.UI_CROP, "undistort": {"model": "auto"}})
     assert abs(geom.lens.param - lam) < 0.03
 
 
@@ -21,6 +21,14 @@ def test_undistort_roundtrip():
     fish = undistort.Lens("stereographic", 120.0, 1600, 900)
     rd, ok = fish.src_radius(r)
     np.testing.assert_allclose(fish.undist_radius(rd), r, rtol=1e-6, atol=1e-6)
+
+
+def test_default_applies_no_lens_warp():
+    raw, _ = synth.make_capture(3, lam=0.0)
+    geom = undistort.solve_capture(raw, {"crop": synth.UI_CROP})
+    assert geom.lens.model == "none"
+    out = undistort.undistort(raw, geom)
+    np.testing.assert_array_equal(out, undistort.apply_crop(raw, synth.UI_CROP))
 
 
 def test_fisheye_model_estimate_runs():
