@@ -1,0 +1,6 @@
+# road-view captures are third-party map imagery and outputs can be large: keep them out of the public repo
+captures/
+work/
+*.mp4
+__pycache__/
+.pytest_cache/

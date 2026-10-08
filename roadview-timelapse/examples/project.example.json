@@ -1,0 +1,31 @@
+{
+  "name": "mapo-street",
+  "place": "서울 마포구 ○○로 (메모용)",
+  "scene": "a narrow two-lane commercial street in Seoul lined with three- and four-story shop buildings",
+  "orientation": "landscape",
+  "reference": "2026-05",
+  "tone": {"luma": 0.35, "color": 0.0},
+  "captures": [
+    {"id": "2009-08", "file": "captures/2009-08.png", "date": "2009-08", "crop": [0, 64, 2880, 1560]},
+    {"id": "2014-05", "file": "captures/2014-05.png", "date": "2014-05", "crop": [0, 64, 2880, 1560]},
+    {"id": "2019-10", "file": "captures/2019-10.png", "date": "2019-10", "crop": [0, 64, 2880, 1560], "crowd": "busy"},
+    {"id": "2026-05", "file": "captures/2026-05.png", "date": "2026-05", "crop": [0, 64, 2880, 1560],
+     "ignore": [[40, 1400, 300, 200]]}
+  ],
+  "transitions": {
+    "2009-08>2014-05": {"changes": "The photo studio on the corner closes and its storefront reopens as a phone shop."},
+    "2014-05>2019-10": {"changes": "The two-story house on the right is torn down and a five-story brick building rises in its place."}
+  },
+  "signs": [
+    {"id": "corner-sign", "box": [0.08, 0.42, 0.25, 0.10]},
+    {"id": "middle-sign", "box": [0.37, 0.42, 0.25, 0.10]}
+  ],
+  "video": {
+    "tier": "standard",
+    "hold_seconds": 3.0,
+    "first_hold_seconds": 3.0,
+    "last_hold_seconds": 4.0,
+    "transition_seconds": 2.6,
+    "billing_mode": "subscription"
+  }
+}
